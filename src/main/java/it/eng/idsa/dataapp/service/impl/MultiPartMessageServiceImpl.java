@@ -32,6 +32,8 @@ import com.google.gson.JsonParser;
 
 import de.fraunhofer.iais.eis.ArtifactRequestMessage;
 import de.fraunhofer.iais.eis.ArtifactResponseMessageBuilder;
+import de.fraunhofer.iais.eis.DescriptionRequestMessage;
+import de.fraunhofer.iais.eis.DescriptionResponseMessageBuilder;
 import de.fraunhofer.iais.eis.Message;
 import de.fraunhofer.iais.eis.NotificationMessageBuilder;
 import de.fraunhofer.iais.eis.RejectionMessageBuilder;
@@ -135,7 +137,11 @@ public class MultiPartMessageServiceImpl implements MultiPartMessageService {
         try {
             if(null == header || null == header.getId() || header.getId().toString().isEmpty())
                 header = new NotificationMessageBuilder().build();
-            if (header instanceof ArtifactRequestMessage){
+            
+            if(header instanceof DescriptionRequestMessage) {
+            	output=serializeMessage(createDescriptionResponseMessage((DescriptionRequestMessage) header));
+            }
+            else if (header instanceof ArtifactRequestMessage){
                 output = serializeMessage(createArtifactResponseMessage((ArtifactRequestMessage) header));
             } else {
                 output = serializeMessage(createResultMessage(header));
@@ -267,6 +273,17 @@ public class MultiPartMessageServiceImpl implements MultiPartMessageService {
 				._recipientConnector_(asList(header.getIssuerConnector()))
 				._correlationMessage_(header.getId())
 				.build();
+	}
+	
+	public Message createDescriptionResponseMessage(DescriptionRequestMessage header) {
+		return new DescriptionResponseMessageBuilder()
+				._issuerConnector_(whoIAm())
+				._issued_(DateUtil.now())
+				._modelVersion_(informationModelVersion)
+				._recipientConnector_(asList(header.getIssuerConnector()))
+				._correlationMessage_(header.getId())
+				.build();
+		
 	}
 
 
