@@ -15,6 +15,7 @@ import org.springframework.cache.annotation.EnableCaching;
 public class ApplicationDataApp {
 
 	public static void main(String[] args) {
+		System.setProperty("org.apache.tomcat.util.buf.UDecoder.ALLOW_ENCODED_SLASH", "true");
 		SpringApplication.run(ApplicationDataApp.class, args);
 	}
 
