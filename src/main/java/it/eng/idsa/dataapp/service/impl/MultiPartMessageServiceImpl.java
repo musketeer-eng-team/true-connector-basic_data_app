@@ -158,17 +158,18 @@ public class MultiPartMessageServiceImpl implements MultiPartMessageService {
     }
 
 
-	@Override
-	public Message getMessage(Object header) {
-		Message message = null;
-		try {
-			message = new Serializer().deserialize(String.valueOf(header), Message.class);
-		} catch (IOException e) {
-			logger.error("Error while deserializing message", e);
-		}
-		return message;
-	}
+//	@Override
+//	public Message getMessage(Object header) {
+//		Message message = null;
+//		try {
+//			message = new Serializer().deserialize(String.valueOf(header), Message.class);
+//		} catch (IOException e) {
+//			logger.error("Error while deserializing message", e);
+//		}
+//		return message;
+//	}
 
+    @Override
 	public Message getIDSMessage(String header) {
 		Message message = null;
 		try {
@@ -310,6 +311,7 @@ public class MultiPartMessageServiceImpl implements MultiPartMessageService {
 		return new ResultMessageBuilder()
 				._issuerConnector_(whoIAmEngRDProvider())
 				._issued_(DateUtil.now())
+				._senderAgent_(URI.create("http://w3id.org/engrd/provider"))
 				._modelVersion_(informationModelVersion)
 				._recipientConnector_(header != null ? asList(header.getIssuerConnector()) : asList(whoIAm()))
 				._correlationMessage_(header != null ? header.getId() : whoIAm())
@@ -327,7 +329,9 @@ public class MultiPartMessageServiceImpl implements MultiPartMessageService {
 				._issuerConnector_(whoIAmEngRDProvider())
 				._issued_(DateUtil.now())
 				._modelVersion_(informationModelVersion)
+				._senderAgent_(URI.create("http://w3id.org/engrd/provider"))
 				._recipientConnector_(header != null ? asList(header.getIssuerConnector()) : asList(whoIAm()))
+				._recipientAgent_(Util.asList(URI.create("https://agent1.com"), URI.create("https://agent2.com")))
 				._correlationMessage_(header != null ? header.getId() : whoIAm())
 				.build();
 	}
@@ -339,6 +343,7 @@ public class MultiPartMessageServiceImpl implements MultiPartMessageService {
 				._transferContract_(header.getTransferContract())
 				._correlationMessage_(header != null ? header.getId() : whoIAm())
 				._issued_(DateUtil.now())
+				._senderAgent_(URI.create("http://w3id.org/engrd/provider"))
 				._issuerConnector_(whoIAmEngRDProvider())
 				._recipientConnector_(Util.asList(header != null ? header.getIssuerConnector() : whoIAm()))
 				.build();
@@ -347,6 +352,7 @@ public class MultiPartMessageServiceImpl implements MultiPartMessageService {
 	private Message createDescriptionResponseMessage(DescriptionRequestMessage header) {
 		return new DescriptionResponseMessageBuilder()
 				._issuerConnector_(whoIAmEngRDProvider())
+				._senderAgent_(URI.create("http://w3id.org/engrd/provider"))
 				._issued_(DateUtil.now())
 				._modelVersion_(informationModelVersion)
 				._recipientConnector_(header != null ? asList(header.getIssuerConnector()) : asList(whoIAm()))
@@ -360,6 +366,7 @@ public class MultiPartMessageServiceImpl implements MultiPartMessageService {
 				._issuerConnector_(whoIAmEngRDProvider())
 				._issued_(DateUtil.now())
 				._modelVersion_(informationModelVersion)
+				._senderAgent_(URI.create("http://w3id.org/engrd/provider"))
 				._recipientConnector_(header != null ? asList(header.getIssuerConnector()) : asList(whoIAm()))
 				._correlationMessage_(header != null ? header.getId() : whoIAm())
 				._rejectionReason_(RejectionReason.MALFORMED_MESSAGE)
@@ -370,6 +377,7 @@ public class MultiPartMessageServiceImpl implements MultiPartMessageService {
 		return new RejectionMessageBuilder()
 				._issuerConnector_(whoIAmEngRDProvider())
 				._issued_(DateUtil.now())
+				._senderAgent_(URI.create("http://w3id.org/engrd/provider"))
 				._modelVersion_(informationModelVersion)
 				._recipientConnector_(header != null ? asList(header.getIssuerConnector()) : asList(whoIAm()))
 				._correlationMessage_(header != null ? header.getId() : whoIAm())
@@ -389,6 +397,7 @@ public class MultiPartMessageServiceImpl implements MultiPartMessageService {
 		return new MessageProcessedNotificationMessageBuilder()
 				._issued_(DateUtil.now())
 				._modelVersion_(informationModelVersion)
+				._senderAgent_(URI.create("http://w3id.org/engrd/provider"))
 				._issuerConnector_(whoIAmEngRDProvider())
 				._recipientConnector_(header != null ? asList(header.getIssuerConnector()) : asList(whoIAm()))
 				._correlationMessage_(header != null ? header.getId() : whoIAm())
@@ -401,6 +410,7 @@ public class MultiPartMessageServiceImpl implements MultiPartMessageService {
 				._issuerConnector_(whoIAmEngRDProvider())
 				._issued_(DateUtil.now())
 				._modelVersion_(informationModelVersion)
+				._senderAgent_(URI.create("http://w3id.org/engrd/provider"))
 				._recipientConnector_(header != null ? asList(header.getIssuerConnector()) : asList(whoIAm()))
 				._correlationMessage_(header != null ? header.getId() : whoIAm())
 				._rejectionReason_(RejectionReason.MALFORMED_MESSAGE)
@@ -412,6 +422,7 @@ public class MultiPartMessageServiceImpl implements MultiPartMessageService {
 				._issuerConnector_(whoIAmEngRDProvider())
 				._issued_(DateUtil.now())
 				._modelVersion_(informationModelVersion)
+				._senderAgent_(URI.create("http://w3id.org/engrd/provider"))
 				._recipientConnector_(header != null ? asList(header.getIssuerConnector()) : asList(whoIAm()))
 				._correlationMessage_(header != null ? header.getId() : whoIAm())
 				._rejectionReason_(RejectionReason.NOT_AUTHENTICATED)
@@ -424,6 +435,7 @@ public class MultiPartMessageServiceImpl implements MultiPartMessageService {
 				._issuerConnector_(whoIAmEngRDProvider())
 				._issued_(DateUtil.now())
 				._modelVersion_(informationModelVersion)
+				._senderAgent_(URI.create("http://w3id.org/engrd/provider"))
 				._recipientConnector_(header != null ? asList(header.getIssuerConnector()) : asList(whoIAm()))
 				._correlationMessage_(header != null ? header.getId() : whoIAm())
 				._rejectionReason_(RejectionReason.NOT_FOUND)
@@ -434,6 +446,7 @@ public class MultiPartMessageServiceImpl implements MultiPartMessageService {
 		return new RejectionMessageBuilder()
 				._issuerConnector_(whoIAmEngRDProvider())
 				._issued_(DateUtil.now())
+				._senderAgent_(URI.create("http://w3id.org/engrd/provider"))
 				._modelVersion_(informationModelVersion)
 				._recipientConnector_(header != null ? asList(header.getIssuerConnector()) : asList(whoIAm()))
 				._correlationMessage_(header != null ? header.getId() : whoIAm())

@@ -130,7 +130,7 @@ public class MessageUtilTest {
 	public void testResponsePayloadWithRequestedElementInHeaderStringSuccessfull() throws IOException {
 		DescriptionRequestMessage drm = TestUtilMessageService.getDescriptionRequestMessage(EXISTING_REQUESTED_ELEMENT_ID);
 		String drmString = TestUtilMessageService.getMessageAsString(drm);
-		when(multiPartMessageService.getMessage((Object)drmString)).thenReturn(drm);
+		when(multiPartMessageService.getMessage(drmString)).thenReturn(drm);
  		String payload = messageUtil.createResponsePayload(drmString);
 		assertEquals(EXISTING_REQUESTED_ELEMENT_ID, serializer.deserialize(payload, Resource.class).getId());
 	}
@@ -139,7 +139,7 @@ public class MessageUtilTest {
 	public void testResponsePayloadWithRequestedElementInHeaderStringFailed() throws IOException {
 		DescriptionRequestMessage drm = TestUtilMessageService.getDescriptionRequestMessage(NON_EXISTING_REQUESTED_ELEMENT_ID);
 		String drmString = TestUtilMessageService.getMessageAsString(drm);
-		when(multiPartMessageService.getMessage((Object)drmString)).thenReturn(drm);
+		when(multiPartMessageService.getMessage(drmString)).thenReturn(drm);
  		String payload = messageUtil.createResponsePayload(drmString);
  		assertTrue(serializer.deserialize(payload, RejectionMessage.class) instanceof RejectionMessage);
 	}

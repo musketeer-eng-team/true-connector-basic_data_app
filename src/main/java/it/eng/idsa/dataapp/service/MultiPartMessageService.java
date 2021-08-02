@@ -29,7 +29,8 @@ public interface MultiPartMessageService {
 	String getPayload(String body);
 
 	Message getMessage(String body);
-	Message getMessage(Object header);
+//	Message getMessage(Object header);
+	Message getIDSMessage(String header);
 	String addToken(Message message, String token);
 	HttpEntity createMultipartMessage(String header, String payload/*, String boundary, String contentType*/);
 	String getToken(String message);

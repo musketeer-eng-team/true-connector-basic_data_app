@@ -1,5 +1,8 @@
 package it.eng.idsa.dataapp.web.rest;
 
+import static de.fraunhofer.iais.eis.util.Util.asList;
+
+import java.net.URI;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -120,6 +123,13 @@ public class DataControllerHttpHeader {
 		headers.add("IDS-CorrelationMessage", "https://w3id.org/idsa/autogen/"+ responseMessageType +"/"+ UUID.randomUUID().toString());
 		headers.add("IDS-ModelVersion", "4.0.0");
 		headers.add("IDS-Id", "https://w3id.org/idsa/autogen/"+ responseMessageType +"/"+ UUID.randomUUID().toString());
+		headers.add("IDS-senderAgent", "https://sender.agent.com");
+		headers.add("IDS-recipientAgent", "https://recipent.agent.com");
+		headers.add("IDS-recipientConnector", "https://recipent1.connector.com");
+		headers.add("IDS-recipientConnector", "https://recipent2.connector.com");
+//		._recipientConnector_(header != null ? asList(header.getIssuerConnector()) : asList(whoIAm()))
+//		._recipientAgent_(Util.asList(URI.create("https://agent1.com"), URI.create("https://agent2.com")))
+		
 		if (rejectionReason != null) {
 			headers.add("IDS-RejectionReason", rejectionReason);
 		}

@@ -11,6 +11,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.validation.constraints.NotNull;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -42,14 +44,9 @@ public class MessageUtil {
 	private static final Logger logger = LoggerFactory.getLogger(MessageUtil.class);
 	
 	private Path dataLakeDirectory;
-	
 	private RestTemplate restTemplate;
-	
 	private ECCProperties eccProperties;
-	
 	private MultiPartMessageService multiPartMessageService;
-	
-	
 	
 	public MessageUtil(@Value("${application.dataLakeDirectory}") Path dataLakeDirectory, RestTemplate restTemplate, ECCProperties eccProperties, MultiPartMessageService multiPartMessageService) {
 		super();
@@ -82,7 +79,7 @@ public class MessageUtil {
 				return getSelfDescriptionAsString();
 			}
 		} else {
-			return createResponsePayload();
+			return createDefaultPayload();
 		}
 	}
 	
@@ -93,7 +90,7 @@ public class MessageUtil {
 			return null;
 		} else if (requestHeader.contains(DescriptionRequestMessage.class.getSimpleName())) {
 			if (requestHeader.contains("ids:requestedElement")) {
-				DescriptionRequestMessage drm = (DescriptionRequestMessage) multiPartMessageService.getMessage((Object) requestHeader);
+				DescriptionRequestMessage drm = (DescriptionRequestMessage) multiPartMessageService.getMessage(requestHeader);
 				String element = getRequestedElement(drm.getRequestedElement(), getSelfDescription());
 				if (StringUtils.isNotBlank(element)) {
 					return element;
@@ -109,7 +106,7 @@ public class MessageUtil {
 				return getSelfDescriptionAsString();
 			}
 		} else {
-			return createResponsePayload();
+			return createDefaultPayload();
 		}
 	}
 	
@@ -131,12 +128,12 @@ public class MessageUtil {
 				return getSelfDescriptionAsString();
 			}
 		} else {
-			return createResponsePayload();
+			return createDefaultPayload();
 		}
 	}
 	
 
-	private String createResponsePayload() {
+	private String createDefaultPayload() {
 		// Put check sum in the payload
 		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 		Date date = new Date();
@@ -209,5 +206,31 @@ public class MessageUtil {
 		}
 		logger.error("Requested element not found.");
 		return null;
+	}
+	
+	
+	private String createData(String firstName, String lastName, String dob, String address, String role) {
+		Map<String, String> jsonObject = new HashMap<>();
+		jsonObject.put("firstName", firstName);
+		jsonObject.put("lastName", lastName);
+		jsonObject.put("dateOfBirth", dob);
+		jsonObject.put("address", address);
+		jsonObject.put("role", role);
+		return new GsonBuilder().create().toJson(jsonObject);
+	}
+	
+	private String createArtifactResponsePayload(@NotNull URI requestedArtifact) {
+		if(requestedArtifact.equals(URI.create("http://w3id.org/engrd/connector/artifact/igor"))) {
+			return createData("Igor", "Balog", "24.12.1980", "Novi Sad", "team lead");
+		} else if(requestedArtifact.equals(URI.create("http://w3id.org/engrd/connector/artifact/david"))) {
+			return createData("David", "Jovanovic", "24.12.1980", "Negotin", "developer");
+		} else if(requestedArtifact.equals(URI.create("http://w3id.org/engrd/connector/artifact/petar"))) {
+			return createData("Petar", "Crepulja", "24.12.1976", "Belgrade", "developer");
+		} else if(requestedArtifact.equals(URI.create("http://w3id.org/engrd/connector/artifact/mattia"))) {
+			return createData("Mattia", "Giuseppe Marzano", "24.12.1980", "Italy", "developer");
+		} else if(requestedArtifact.equals(URI.create("http://w3id.org/engrd/connector/artifact/gabriele"))) {
+			return createData("Gabriele", "De Luca", "24.12.1980", "Lecce", "project owner");
+		}
+		return createDefaultPayload();
 	}
 }

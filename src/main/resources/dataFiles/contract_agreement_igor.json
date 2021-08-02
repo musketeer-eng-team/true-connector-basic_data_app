@@ -7,7 +7,7 @@
   "@id": "https://w3id.org/idsa/autogen/contract/restrict-access-interval",    
   "profile": "http://example.com/ids-profile",    
   "ids:target": {
-      "@id":"http://w3id.org/engrd/connector/artifact/1"
+      "@id":"http://w3id.org/engrd/connector/artifact/igor"
    },    
   "ids:provider": "http://example.com/party/my-party",    
   "ids:consumer": "http://example.com/party/consumer-party",    

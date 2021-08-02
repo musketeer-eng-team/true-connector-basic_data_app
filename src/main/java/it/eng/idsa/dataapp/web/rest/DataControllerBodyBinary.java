@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import it.eng.idsa.dataapp.service.MultiPartMessageService;
-import it.eng.idsa.dataapp.util.MessageUtil;
+import it.eng.idsa.dataapp.service.PayloadService;
 import it.eng.idsa.multipart.builder.MultipartMessageBuilder;
 import it.eng.idsa.multipart.domain.MultipartMessage;
 import it.eng.idsa.multipart.processor.MultipartMessageProcessor;
@@ -28,12 +28,12 @@ public class DataControllerBodyBinary {
 	private static final Logger logger = LoggerFactory.getLogger(DataControllerBodyBinary.class);
 	
 	private MultiPartMessageService multiPartMessageService;
-	private MessageUtil messageUtil;
+	private PayloadService payloadService;
 	
 	public DataControllerBodyBinary(MultiPartMessageService multiPartMessageService,
-			MessageUtil messageUtil) {
+			PayloadService payloadService) {
 		this.multiPartMessageService = multiPartMessageService;
-		this.messageUtil = messageUtil;
+		this.payloadService = payloadService;
 	}
 	
 	@PostMapping(value = "/data")
@@ -57,11 +57,11 @@ public class DataControllerBodyBinary {
 		String headerResponse = multiPartMessageService.getResponseHeader(headerMessage);
 		String responsePayload = null;
 		if (!headerResponse.contains("ids:rejectionReason")) {
-			responsePayload = messageUtil.createResponsePayload(headerMessage);
+			responsePayload = payloadService.createPayload(multiPartMessageService.getIDSMessage(headerMessage), payload);
 		}else {
 			responsePayload = "Rejected message";
 		}
-		if (responsePayload.contains("ids:rejectionReason")) {
+		if (responsePayload != null && responsePayload.contains("ids:rejectionReason")) {
 			headerResponse = responsePayload;
 			responsePayload = "Rejected message";
 		}
@@ -74,6 +74,7 @@ public class DataControllerBodyBinary {
 		Optional<String> boundary = MultipartMessageProcessor.getMessageBoundaryFromMessage(responseMessageString);
 		String contentType = "multipart/mixed; boundary=" + boundary.orElse("---aaa") + ";charset=UTF-8";
 
+		logger.info("Sending response to ECC");
 		return ResponseEntity.ok()
 				.header("foo", "bar")
 				.header(MIME.CONTENT_TYPE, contentType)

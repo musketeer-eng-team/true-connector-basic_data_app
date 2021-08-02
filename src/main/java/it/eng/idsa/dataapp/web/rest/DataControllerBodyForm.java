@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import it.eng.idsa.dataapp.service.MultiPartMessageService;
+import it.eng.idsa.dataapp.service.PayloadService;
 import it.eng.idsa.dataapp.util.MessageUtil;
 
 @RestController
@@ -24,11 +25,15 @@ public class DataControllerBodyForm {
 
 	private MultiPartMessageService multiPartMessageService;
 	private MessageUtil messageUtil;
+	private PayloadService payloadService;
+
 	
 	public DataControllerBodyForm(MultiPartMessageService multiPartMessageService,
-			MessageUtil messageUtil) {
+			MessageUtil messageUtil,
+			PayloadService payloadService) {
 		this.multiPartMessageService= multiPartMessageService;
 		this.messageUtil = messageUtil;
+		this.payloadService = payloadService;
     }
 
 	@PostMapping(value = "/data")
@@ -52,7 +57,7 @@ public class DataControllerBodyForm {
 		String headerResponse = multiPartMessageService.getResponseHeader(header);
 		String responsePayload = null;
 		if (!headerResponse.contains("ids:rejectionReason")) {
-			responsePayload = messageUtil.createResponsePayload(header);
+			responsePayload = payloadService.createPayload(multiPartMessageService.getIDSMessage(header), payload);
 		}else {
 			responsePayload = "Rejected message";
 		}
