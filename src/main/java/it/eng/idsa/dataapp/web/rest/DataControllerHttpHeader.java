@@ -10,6 +10,7 @@ import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -23,9 +24,11 @@ import de.fraunhofer.iais.eis.ArtifactResponseMessage;
 import de.fraunhofer.iais.eis.ContractAgreementMessage;
 import de.fraunhofer.iais.eis.DescriptionResponseMessage;
 import de.fraunhofer.iais.eis.RejectionMessage;
+import de.fraunhofer.iais.eis.TokenFormat;
 import de.fraunhofer.iais.eis.util.Util;
 import it.eng.idsa.dataapp.service.MultiPartMessageService;
 import it.eng.idsa.dataapp.util.MessageUtil;
+import it.eng.idsa.multipart.util.UtilMessageService;
 
 @Controller
 @ConditionalOnProperty(name = "application.dataapp.http.config", havingValue = "http-header")
@@ -35,8 +38,13 @@ public class DataControllerHttpHeader {
 	
 	private MessageUtil messageUtil;
 	
-	public DataControllerHttpHeader(MessageUtil messageUtil) {
+	private String informationModelVersion;
+	
+	
+	public DataControllerHttpHeader(MessageUtil messageUtil, @Value("${information.model.version}")String informationModelVersion) {
+		super();
 		this.messageUtil = messageUtil;
+		this.informationModelVersion = informationModelVersion;
 	}
 
 	@PostMapping(value = "/data")
@@ -121,15 +129,24 @@ public class DataControllerHttpHeader {
 		headers.add("IDS-Issued", formattedDate);
 		headers.add("IDS-IssuerConnector", "http://w3id.org/engrd/connector");
 		headers.add("IDS-CorrelationMessage", "https://w3id.org/idsa/autogen/"+ responseMessageType +"/"+ UUID.randomUUID().toString());
-		headers.add("IDS-ModelVersion", "4.0.0");
+		headers.add("IDS-ModelVersion", informationModelVersion);
 		headers.add("IDS-Id", "https://w3id.org/idsa/autogen/"+ responseMessageType +"/"+ UUID.randomUUID().toString());
-		headers.add("IDS-senderAgent", "https://sender.agent.com");
-		headers.add("IDS-recipientAgent", "https://recipent.agent.com");
-		headers.add("IDS-recipientConnector", "https://recipent1.connector.com");
-		headers.add("IDS-recipientConnector", "https://recipent2.connector.com");
-//		._recipientConnector_(header != null ? asList(header.getIssuerConnector()) : asList(whoIAm()))
-//		._recipientAgent_(Util.asList(URI.create("https://agent1.com"), URI.create("https://agent2.com")))
 		
+		if (rejectionReason != null) {
+			headers.add("IDS-RejectionReason", rejectionReason);
+		}
+		headers.add("IDS-CorrelationMessage", "https://w3id.org/idsa/autogen/"+ responseMessageType +"/"+ UUID.randomUUID().toString());
+		headers.add("IDS-ModelVersion", informationModelVersion);
+		headers.add("IDS-Id", "https://w3id.org/idsa/autogen/"+ responseMessageType +"/"+ UUID.randomUUID().toString());
+		headers.add("IDS-SenderAgent", "https://sender.agent.com");
+		headers.add("IDS-RecipientAgent", "https://recipent.agent.com");
+		headers.add("IDS-RecipientConnector", "https://recipent1.connector.com");
+		headers.add("IDS-RecipientConnector", "https://recipent2.connector.com");
+		
+		headers.add("IDS-SecurityToken-Type", "ids:DynamicAttributeToken");
+		headers.add("IDS-SecurityToken-Id", "https://w3id.org/idsa/autogen/" + UUID.randomUUID());
+		headers.add("IDS-SecurityToken-TokenFormat", TokenFormat.JWT.getId().toString());
+		headers.add("IDS-SecurityToken-TokenValue", UtilMessageService.TOKEN_VALUE);
 		if (rejectionReason != null) {
 			headers.add("IDS-RejectionReason", rejectionReason);
 		}

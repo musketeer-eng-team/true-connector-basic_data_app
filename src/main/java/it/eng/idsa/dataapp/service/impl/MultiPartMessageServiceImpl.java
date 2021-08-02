@@ -51,6 +51,7 @@ import it.eng.idsa.dataapp.service.MultiPartMessageService;
 import it.eng.idsa.multipart.domain.MultipartMessage;
 import it.eng.idsa.multipart.processor.MultipartMessageProcessor;
 import it.eng.idsa.multipart.util.DateUtil;
+import it.eng.idsa.multipart.util.UtilMessageService;
 
 /**
  *
@@ -68,8 +69,11 @@ public class MultiPartMessageServiceImpl implements MultiPartMessageService {
 
 	private static final Logger logger = LoggerFactory.getLogger(MultiPartMessageServiceImpl.class);
 	
-	@Value("${information.model.version}")
 	private String informationModelVersion;
+	
+	public MultiPartMessageServiceImpl(@Value("${information.model.version}") String informationModelVersion) {
+		this.informationModelVersion = informationModelVersion;
+	}
 	
 	@Override
 	public String getHeader(String body) {
@@ -96,7 +100,8 @@ public class MultiPartMessageServiceImpl implements MultiPartMessageService {
 			String msgSerialized = serializeMessage(message);
 			Token tokenJsonValue = new TokenBuilder()
 					._tokenFormat_(TokenFormat.JWT)
-					._tokenValue_(token).build();
+					._tokenValue_(token)
+					.build();
 			String tokenValueSerialized=serializeMessage(tokenJsonValue);
 			JSONParser parser = new JSONParser();
 			JSONObject jsonObject = (JSONObject) parser.parse(msgSerialized);
@@ -128,7 +133,7 @@ public class MultiPartMessageServiceImpl implements MultiPartMessageService {
     public String getResponseHeader(String header) {
 	    Message message = null;
         if(null == header || header.isEmpty() || "null".equalsIgnoreCase(header)) {
-            message = new NotificationMessageBuilder().build();
+            message = new NotificationMessageBuilder()._securityToken_(UtilMessageService.getDynamicAttributeToken())._senderAgent_(whoIAmEngRDProvider()).build();
         } else
             message = getIDSMessage(header);
         return getResponseHeader(message);
@@ -139,7 +144,7 @@ public class MultiPartMessageServiceImpl implements MultiPartMessageService {
         String output = null;
         try {
             if(null == header || null == header.getId() || header.getId().toString().isEmpty())
-                header = new NotificationMessageBuilder().build();
+                header = new NotificationMessageBuilder()._securityToken_(UtilMessageService.getDynamicAttributeToken())._senderAgent_(whoIAmEngRDProvider()).build();
             if (header instanceof ArtifactRequestMessage){
                 output = serializeMessage(createArtifactResponseMessage((ArtifactRequestMessage) header));
             } else if (header instanceof ContractRequestMessage) {
@@ -219,7 +224,7 @@ public class MultiPartMessageServiceImpl implements MultiPartMessageService {
 			/*
 			 * bodyHeaderPart = FormBodyPartBuilder.create() .addField(HTTP.CONTENT_LEN,
 			 * ""+header.length()) .setName("header") .setBody(new StringBody(header))
-			 * .build();
+			 * ._securityToken_(TestUtilMessageService.getDynamicAttributeToken())._senderAgent_(whoIAmEngRDProvider()).build();
 			 */
 			ContentBody headerBody = new StringBody(header, ContentType.APPLICATION_JSON);
 			bodyHeaderPart = FormBodyPartBuilder.create("header", headerBody).build();
@@ -235,7 +240,7 @@ public class MultiPartMessageServiceImpl implements MultiPartMessageService {
 			/*
 			 * = FormBodyPartBuilder.create() .addField(HTTP.CONTENT_LEN,
 			 * ""+payload.length()) .setName("payload") .setBody(new StringBody(payload))
-			 * .build();
+			 * ._securityToken_(TestUtilMessageService.getDynamicAttributeToken())._senderAgent_(whoIAmEngRDProvider()).build();
 			 */
 
 
@@ -311,10 +316,11 @@ public class MultiPartMessageServiceImpl implements MultiPartMessageService {
 		return new ResultMessageBuilder()
 				._issuerConnector_(whoIAmEngRDProvider())
 				._issued_(DateUtil.now())
-				._senderAgent_(URI.create("http://w3id.org/engrd/provider"))
 				._modelVersion_(informationModelVersion)
+				._senderAgent_(whoIAmEngRDProvider())
 				._recipientConnector_(header != null ? asList(header.getIssuerConnector()) : asList(whoIAm()))
 				._correlationMessage_(header != null ? header.getId() : whoIAm())
+				._securityToken_(UtilMessageService.getDynamicAttributeToken())
 				.build();
 	}
 
@@ -329,10 +335,11 @@ public class MultiPartMessageServiceImpl implements MultiPartMessageService {
 				._issuerConnector_(whoIAmEngRDProvider())
 				._issued_(DateUtil.now())
 				._modelVersion_(informationModelVersion)
-				._senderAgent_(URI.create("http://w3id.org/engrd/provider"))
+				._senderAgent_(whoIAmEngRDProvider())
 				._recipientConnector_(header != null ? asList(header.getIssuerConnector()) : asList(whoIAm()))
 				._recipientAgent_(Util.asList(URI.create("https://agent1.com"), URI.create("https://agent2.com")))
 				._correlationMessage_(header != null ? header.getId() : whoIAm())
+				._securityToken_(UtilMessageService.getDynamicAttributeToken())
 				.build();
 	}
 	
@@ -343,20 +350,23 @@ public class MultiPartMessageServiceImpl implements MultiPartMessageService {
 				._transferContract_(header.getTransferContract())
 				._correlationMessage_(header != null ? header.getId() : whoIAm())
 				._issued_(DateUtil.now())
-				._senderAgent_(URI.create("http://w3id.org/engrd/provider"))
 				._issuerConnector_(whoIAmEngRDProvider())
+				._senderAgent_(whoIAmEngRDProvider())
 				._recipientConnector_(Util.asList(header != null ? header.getIssuerConnector() : whoIAm()))
+				._securityToken_(UtilMessageService.getDynamicAttributeToken())
+				._senderAgent_(whoIAmEngRDProvider())
 				.build();
-	}
+	}	
 	
 	private Message createDescriptionResponseMessage(DescriptionRequestMessage header) {
 		return new DescriptionResponseMessageBuilder()
 				._issuerConnector_(whoIAmEngRDProvider())
-				._senderAgent_(URI.create("http://w3id.org/engrd/provider"))
 				._issued_(DateUtil.now())
 				._modelVersion_(informationModelVersion)
 				._recipientConnector_(header != null ? asList(header.getIssuerConnector()) : asList(whoIAm()))
 				._correlationMessage_(header != null ? header.getId() : whoIAm())
+				._securityToken_(UtilMessageService.getDynamicAttributeToken())
+				._senderAgent_(whoIAmEngRDProvider())
 				.build();
 	}
 
@@ -366,10 +376,11 @@ public class MultiPartMessageServiceImpl implements MultiPartMessageService {
 				._issuerConnector_(whoIAmEngRDProvider())
 				._issued_(DateUtil.now())
 				._modelVersion_(informationModelVersion)
-				._senderAgent_(URI.create("http://w3id.org/engrd/provider"))
 				._recipientConnector_(header != null ? asList(header.getIssuerConnector()) : asList(whoIAm()))
 				._correlationMessage_(header != null ? header.getId() : whoIAm())
 				._rejectionReason_(RejectionReason.MALFORMED_MESSAGE)
+				._securityToken_(UtilMessageService.getDynamicAttributeToken())
+				._senderAgent_(whoIAmEngRDProvider())
 				.build();
 	}
 
@@ -377,11 +388,12 @@ public class MultiPartMessageServiceImpl implements MultiPartMessageService {
 		return new RejectionMessageBuilder()
 				._issuerConnector_(whoIAmEngRDProvider())
 				._issued_(DateUtil.now())
-				._senderAgent_(URI.create("http://w3id.org/engrd/provider"))
 				._modelVersion_(informationModelVersion)
 				._recipientConnector_(header != null ? asList(header.getIssuerConnector()) : asList(whoIAm()))
 				._correlationMessage_(header != null ? header.getId() : whoIAm())
 				._rejectionReason_(RejectionReason.NOT_AUTHENTICATED)
+				._securityToken_(UtilMessageService.getDynamicAttributeToken())
+				._senderAgent_(whoIAmEngRDProvider())
 				.build();
 	}
 
@@ -397,10 +409,11 @@ public class MultiPartMessageServiceImpl implements MultiPartMessageService {
 		return new MessageProcessedNotificationMessageBuilder()
 				._issued_(DateUtil.now())
 				._modelVersion_(informationModelVersion)
-				._senderAgent_(URI.create("http://w3id.org/engrd/provider"))
 				._issuerConnector_(whoIAmEngRDProvider())
 				._recipientConnector_(header != null ? asList(header.getIssuerConnector()) : asList(whoIAm()))
 				._correlationMessage_(header != null ? header.getId() : whoIAm())
+				._securityToken_(UtilMessageService.getDynamicAttributeToken())
+				._senderAgent_(whoIAmEngRDProvider())
 				.build();
 	}
 	
@@ -410,10 +423,11 @@ public class MultiPartMessageServiceImpl implements MultiPartMessageService {
 				._issuerConnector_(whoIAmEngRDProvider())
 				._issued_(DateUtil.now())
 				._modelVersion_(informationModelVersion)
-				._senderAgent_(URI.create("http://w3id.org/engrd/provider"))
 				._recipientConnector_(header != null ? asList(header.getIssuerConnector()) : asList(whoIAm()))
 				._correlationMessage_(header != null ? header.getId() : whoIAm())
 				._rejectionReason_(RejectionReason.MALFORMED_MESSAGE)
+				._securityToken_(UtilMessageService.getDynamicAttributeToken())
+				._senderAgent_(whoIAmEngRDProvider())
 				.build();
 	}
 
@@ -422,10 +436,11 @@ public class MultiPartMessageServiceImpl implements MultiPartMessageService {
 				._issuerConnector_(whoIAmEngRDProvider())
 				._issued_(DateUtil.now())
 				._modelVersion_(informationModelVersion)
-				._senderAgent_(URI.create("http://w3id.org/engrd/provider"))
 				._recipientConnector_(header != null ? asList(header.getIssuerConnector()) : asList(whoIAm()))
 				._correlationMessage_(header != null ? header.getId() : whoIAm())
 				._rejectionReason_(RejectionReason.NOT_AUTHENTICATED)
+				._securityToken_(UtilMessageService.getDynamicAttributeToken())
+				._senderAgent_(whoIAmEngRDProvider())
 				.build();
 	}
 
@@ -435,10 +450,11 @@ public class MultiPartMessageServiceImpl implements MultiPartMessageService {
 				._issuerConnector_(whoIAmEngRDProvider())
 				._issued_(DateUtil.now())
 				._modelVersion_(informationModelVersion)
-				._senderAgent_(URI.create("http://w3id.org/engrd/provider"))
 				._recipientConnector_(header != null ? asList(header.getIssuerConnector()) : asList(whoIAm()))
 				._correlationMessage_(header != null ? header.getId() : whoIAm())
 				._rejectionReason_(RejectionReason.NOT_FOUND)
+				._securityToken_(UtilMessageService.getDynamicAttributeToken())
+				._senderAgent_(whoIAmEngRDProvider())
 				.build();
 	}
 	
@@ -451,9 +467,13 @@ public class MultiPartMessageServiceImpl implements MultiPartMessageService {
 				._recipientConnector_(header != null ? asList(header.getIssuerConnector()) : asList(whoIAm()))
 				._correlationMessage_(header != null ? header.getId() : whoIAm())
 				._rejectionReason_(RejectionReason.NOT_AUTHORIZED)
+				._securityToken_(UtilMessageService.getDynamicAttributeToken())
+				._senderAgent_(whoIAmEngRDProvider())
+				._securityToken_(UtilMessageService.getDynamicAttributeToken())
+				._senderAgent_(whoIAmEngRDProvider())
 				.build();
 	}
-
+	
     public static String serializeMessage(Object message) throws IOException {
         return MultipartMessageProcessor.serializeToPlainJson(message);
     }
