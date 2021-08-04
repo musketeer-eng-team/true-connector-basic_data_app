@@ -32,6 +32,7 @@ import de.fraunhofer.iais.eis.ArtifactResponseMessage;
 import de.fraunhofer.iais.eis.ConnectorUnavailableMessage;
 import de.fraunhofer.iais.eis.ConnectorUpdateMessage;
 import de.fraunhofer.iais.eis.ContractAgreementMessage;
+import de.fraunhofer.iais.eis.ContractRequestMessage;
 import de.fraunhofer.iais.eis.DescriptionRequestMessage;
 import de.fraunhofer.iais.eis.Message;
 import de.fraunhofer.iais.eis.QueryMessage;
@@ -177,10 +178,20 @@ public class ProxyServiceImpl implements ProxyService {
 		LinkedMultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
 		httpHeaders.add(FORWARD_TO, proxyRequest.getForwardTo());
 		httpHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
+		
 
 		if (requestMessage != null) {
 			map.add("header", UtilMessageService.getMessageAsString(requestMessage));
-			map.add("payload", proxyRequest.getPayload());
+			String payload = null;
+			if(requestMessage instanceof ContractRequestMessage) {
+				logger.info("Creating ContractRequest for payload using requested artifact");
+				payload = UtilMessageService.getMessageAsString(
+						UtilMessageService.getContractRequest(URI.create(proxyRequest.getRequestedArtifact())));
+			} else {
+				logger.info("Using payload from request");
+				payload = proxyRequest.getPayload();
+			}
+			map.add("payload", payload);
 			
 			thirdPartyApi = new URI(eccProperties.getProtocol(), null, eccProperties.getHost(), 
 					eccProperties.getPort(), eccProperties.getFormContext(),
@@ -217,13 +228,14 @@ public class ProxyServiceImpl implements ProxyService {
 							: UtilMessageService.REQUESTED_ARTIFACT);
 		} else if(ContractAgreementMessage.class.getSimpleName().equals(messageType)) {
 			return UtilMessageService.getContractAgreementMessage();
+		} else if(ContractRequestMessage.class.getSimpleName().equals(messageType)) {
+			return UtilMessageService.getContractRequestMessage();
 		} else if(DescriptionRequestMessage.class.getSimpleName().equals(messageType)) {
 			return UtilMessageService.getDescriptionRequestMessage(URI.create(requestedElement));
 		} 
 		return null;
 	}
 
-	@Override
 	public ResponseEntity<String> proxyHttpHeader(ProxyRequest proxyRequest, HttpHeaders httpHeaders)
 			throws URISyntaxException {
 		URI thirdPartyApi = new URI(eccProperties.getProtocol(), null, eccProperties.getHost(), 
@@ -271,6 +283,9 @@ public class ProxyServiceImpl implements ProxyService {
 		} else if(ContractAgreementMessage.class.getSimpleName().equals(messageType)) {
 			httpHeaders.add("IDS-Messagetype", "ids:ContractAgreementMessage");
 			httpHeaders.add("IDS-Id", "https://w3id.org/idsa/autogen/" + ContractAgreementMessage.class.getSimpleName() + "/" + UUID.randomUUID());
+		} else if(ContractRequestMessage.class.getSimpleName().equals(messageType)) {
+			httpHeaders.add("IDS-Messagetype", "ids:ContractRequestMessage");
+			httpHeaders.add("IDS-Id", "https://w3id.org/idsa/autogen/" + ContractRequestMessage.class.getSimpleName() + "/" + UUID.randomUUID());
 		} else if(DescriptionRequestMessage.class.getSimpleName().equals(messageType)) {
 			httpHeaders.add("IDS-Messagetype", "ids:DescriptionRequestMessage");
 			httpHeaders.add("IDS-Id", "https://w3id.org/idsa/autogen/" + DescriptionRequestMessage.class.getSimpleName() + "/" + UUID.randomUUID());
