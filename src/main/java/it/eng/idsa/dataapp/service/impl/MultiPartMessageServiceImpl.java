@@ -146,15 +146,15 @@ public class MultiPartMessageServiceImpl implements MultiPartMessageService {
             if(null == header || null == header.getId() || header.getId().toString().isEmpty())
                 header = new NotificationMessageBuilder()._securityToken_(UtilMessageService.getDynamicAttributeToken())._senderAgent_(whoIAmEngRDProvider()).build();
             if (header instanceof ArtifactRequestMessage){
-                output = serializeMessage(createArtifactResponseMessage((ArtifactRequestMessage) header));
+                output = serializeIDSMessage(createArtifactResponseMessage((ArtifactRequestMessage) header));
             } else if (header instanceof ContractRequestMessage) {
-            	 output = serializeMessage(createContractAgreementMessage((ContractRequestMessage) header));
+            	 output = serializeIDSMessage(createContractAgreementMessage((ContractRequestMessage) header));
 			} else if (header instanceof ContractAgreementMessage) {
-           	 	output = serializeMessage(createProcessNotificationMessage((ContractAgreementMessage) header));
+           	 	output = serializeIDSMessage(createProcessNotificationMessage((ContractAgreementMessage) header));
 			} else if (header instanceof DescriptionRequestMessage) {
-           	 	output = serializeMessage(createDescriptionResponseMessage((DescriptionRequestMessage) header));
+           	 	output = serializeIDSMessage(createDescriptionResponseMessage((DescriptionRequestMessage) header));
 			} else {
-                output = serializeMessage(createResultMessage(header));
+                output = serializeIDSMessage(createResultMessage(header));
             }
         } catch (IOException e) {
 			logger.error("Error while processing response headers", e);
@@ -475,7 +475,10 @@ public class MultiPartMessageServiceImpl implements MultiPartMessageService {
 	}
 	
     public static String serializeMessage(Object message) throws IOException {
-        return MultipartMessageProcessor.serializeToPlainJson(message);
+        return MultipartMessageProcessor.serializeToJsonLD(message);
     }
 
+    public static String serializeIDSMessage(Message message) throws IOException {
+      return MultipartMessageProcessor.serializeToJsonLD(message);
+  }
 }
