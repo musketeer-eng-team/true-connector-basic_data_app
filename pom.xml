@@ -1,44 +1,42 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project
+		xmlns="http://maven.apache.org/POM/4.0.0"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>2.2.5.RELEASE</version>
-		<relativePath /> <!-- lookup parent from repository -->
+		<relativePath />
+		<!-- lookup parent from repository -->
 	</parent>
 	<groupId>it.eng.idsa</groupId>
 	<artifactId>market4.0-data-app</artifactId>
 	<version>0.0.8-SNAPSHOT</version>
 	<name>market4.0-data-app</name>
 	<description>The project for market4.0-data-app</description>
-
 	<properties>
 		<java.version>11</java.version>
 		<tomcat.version>9.0.27</tomcat.version>
 		<start-class>it.eng.idsa.dataapp.ApplicationDataApp</start-class>
 		<information.model.version>4.0.0</information.model.version>
-      	<multipart.message.processor.version>1.0.9-SNAPSHOT</multipart.message.processor.version>
-		<websocket.message.streamer.version>1.0.11-SNAPSHOT</websocket.message.streamer.version>
+		<multipart.message.processor.version>alida.1.0.9-SNAPSHOT</multipart.message.processor.version>
+		<websocket.message.streamer.version>1.0.10.1-SNAPSHOT</websocket.message.streamer.version>
 	</properties>
-	
- 	<repositories> 
-		<repository> 
-			<id>snapshots</id> 
-			<name>maven-snapshots</name> 
+	<repositories>
+		<repository>
+			<id>snapshots</id>
+			<name>maven-snapshots</name>
 			<url>https://maven.iais.fraunhofer.de/artifactory/eis-ids-public</url>
-		</repository> 
+		</repository>
 	</repositories>
-	
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.maven</groupId>
 			<artifactId>maven-model</artifactId>
 			<version>3.6.3</version>
 		</dependency>
-
 		<!-- Spring Boot - common dependencies -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -63,7 +61,6 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-
 		<!-- Swagger -->
 		<dependency>
 			<groupId>io.springfox</groupId>
@@ -75,7 +72,6 @@
 			<artifactId>springfox-swagger-ui</artifactId>
 			<version>2.9.2</version>
 		</dependency>
-		
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter</artifactId>
@@ -87,16 +83,14 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-            <artifactId>logback-classic</artifactId>
-            <groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<groupId>ch.qos.logback</groupId>
 		</dependency>
-		
 		<!-- H2 database -->
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
 		</dependency>
-
 		<!-- Fraunhofer -->
 		<dependency>
 			<groupId>de.fraunhofer.iais.eis.ids.infomodel</groupId>
@@ -108,7 +102,6 @@
 			<artifactId>infomodel-serializer</artifactId>
 			<version>${information.model.version}</version>
 		</dependency>
-		
 		<!-- it.eng.idsa -->
 		<dependency>
 			<groupId>it.eng.idsa</groupId>
@@ -120,80 +113,63 @@
 					<artifactId>multipart-message-processor</artifactId>
 				</exclusion>
 				<exclusion>
-		            <artifactId>logback-classic</artifactId>
-		            <groupId>ch.qos.logback</groupId>
-	          	</exclusion>
-	          	<exclusion>
-	                <artifactId>slf4j-simple</artifactId>
-	                <groupId>org.slf4j</groupId>
-              	</exclusion>
+					<artifactId>logback-classic</artifactId>
+					<groupId>ch.qos.logback</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>slf4j-simple</artifactId>
+					<groupId>org.slf4j</groupId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>it.eng.idsa</groupId>
 			<artifactId>multipart-message-processor</artifactId>
-			<version>${multipart.message.processor.version}</version>
+			<version>alida.1.0.9-SNAPSHOT</version>
 			<exclusions>
 				<exclusion>
-		            <artifactId>logback-classic</artifactId>
-		            <groupId>ch.qos.logback</groupId>
-		          </exclusion>
-		          <exclusion>
-		                <artifactId>slf4j-simple</artifactId>
-		                <groupId>org.slf4j</groupId>
-		            </exclusion>
+					<artifactId>logback-classic</artifactId>
+					<groupId>ch.qos.logback</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>slf4j-simple</artifactId>
+					<groupId>org.slf4j</groupId>
+				</exclusion>
 			</exclusions>
 		</dependency>
-		
-		<dependency>
-			<groupId>it.eng.idsa</groupId>
-			<artifactId>multipart-message-processor</artifactId>
-			<version>${multipart.message.processor.version}</version>
-			<classifier>tests</classifier>
-		    <type>test-jar</type>
-		    <scope>test</scope>
-		</dependency>
-
 		<dependency>
 			<groupId>com.squareup.okhttp3</groupId>
 			<artifactId>okhttp</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>javax.validation</groupId>
 			<artifactId>validation-api</artifactId>
-			</dependency>
-
+		</dependency>
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpmime</artifactId>
-			</dependency>
-
+		</dependency>
 		<dependency>
 			<groupId>com.googlecode.json-simple</groupId>
 			<artifactId>json-simple</artifactId>
 			<version>1.1.1</version>
 		</dependency>
-
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-text</artifactId>
 			<version>1.8</version>
 		</dependency>
-
 		<!-- gson -->
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-configuration-processor</artifactId>
 			<optional>true</optional>
 		</dependency>
 	</dependencies>
-
 	<build>
 		<resources>
 			<resource>
@@ -213,8 +189,11 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
-					<release>${project.java.version}</release>
+					<source>11</source>
+					<target>11</target>
+					<verbose>true</verbose>
 					<encoding>${project.build.sourceEncoding}</encoding>
+					<executable>C:\Users\david\.jdks\adopt-openj9-11.0.11\bin\javac</executable>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -240,5 +219,4 @@
 			</plugin>
 		</plugins>
 	</build>
-
 </project>

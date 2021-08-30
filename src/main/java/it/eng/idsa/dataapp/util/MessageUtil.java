@@ -13,6 +13,9 @@ import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,6 +39,8 @@ import de.fraunhofer.iais.eis.ids.jsonld.Serializer;
 import it.eng.idsa.dataapp.configuration.ECCProperties;
 import it.eng.idsa.dataapp.service.MultiPartMessageService;
 import it.eng.idsa.multipart.processor.MultipartMessageProcessor;
+
+import static it.eng.idsa.dataapp.util.ReadFileToString.read;
 
 @Component
 public class MessageUtil {
@@ -209,5 +214,46 @@ public class MessageUtil {
 		}
 		logger.error("Requested element not found.");
 		return null;
+	}
+
+	public JSONObject createRequestBody(String payload) throws ParseException {
+
+		JSONParser parser = new JSONParser();
+		JSONObject requestBody = (JSONObject) parser.parse(payload);
+
+		return requestBody;
+	}
+
+	public String createResponsePayload(String requestHeader, JSONObject requestBody) throws IOException {
+
+		if (requestHeader.contains(ContractRequestMessage.class.getSimpleName())) {
+			return createContractAgreement(dataLakeDirectory);
+		} else if (requestHeader.contains(ContractAgreementMessage.class.getSimpleName())) {
+			return null;
+		} else if (requestHeader.contains(DescriptionRequestMessage.class.getSimpleName())) {
+			if (requestHeader.contains("ids:requestedElement")) {
+				DescriptionRequestMessage drm = (DescriptionRequestMessage) multiPartMessageService.getMessage((Object) requestHeader);
+				String element = getRequestedElement(drm.getRequestedElement(), getSelfDescription());
+				if (StringUtils.isNotBlank(element)) {
+					return element;
+				} else {
+					try {
+						return MultipartMessageProcessor.serializeToJsonLD(multiPartMessageService.createRejectionCommunicationLocalIssues(drm));
+					} catch (IOException e) {
+						logger.error("Could not serialize rejection", e);
+					}
+					return null;
+				}
+			} else {
+				return getSelfDescriptionAsString();
+			}
+		} else {
+			return createResponseFromPayload(requestBody);
+		}
+	}
+
+	private String createResponseFromPayload(JSONObject requestBody) throws IOException {
+
+		return  read(dataLakeDirectory, new StringBuilder().append(requestBody.get("endpoint").toString()).append(".json").toString());
 	}
 }

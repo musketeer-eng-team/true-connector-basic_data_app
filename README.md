@@ -168,7 +168,7 @@ For <b>REST flow</b>, multipart field should be set to one of the following valu
 In case of mixed or form flow, 'message' and 'payload' parts are used to construct request and forward to ECC connector A-endpoint using Forward-To header value.<br />
 In case of http-header flow, messageAsHeaders and payload are used to construct http-header like request and forward it to ECC A-endpoint.
 
-Configuration regarding A-endpoint for data consumer is located in proeprty file:
+Configuration regarding A-endpoint for data consumer is located in property file:
 
 ```
 application.ecc.protocol=https
@@ -196,3 +196,21 @@ In both cases a GET request is sent to the ECC in order to fetch the Self Descri
 application.ecc.RESTprotocol=http|https
 application.ecc.RESTport=8081|8443
 ```
+
+# Pre-proxy Endpoint
+
+The '/pre-proxy/**' endpoint is used to manage a simple HTTP/s connection coming from another Client Connector Consumer component in order to be compliant with the IDS ecosystem. Specifically, it prepares the message, before being forwarded to the generic '/proxy' endpoint
+
+For instance, the following "cURL" command forwards the invocation to the ECC-provider (at the URL specified inside 'Forward-To'), according to IDS standards, in the format 'mixed' and to the specific endpoint 'connect'.
+
+```
+curl --location --request POST 'https://localhost:8084/pre-proxy/mixed/connect' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+   "Forward-To": "https://ecc-provider:8889/data",
+   "user": "test_user",
+   "password": "test_password"
+}'
+```
+
+If the response message obtained is in place and compliant, the payload of that message is returned in JSON format.

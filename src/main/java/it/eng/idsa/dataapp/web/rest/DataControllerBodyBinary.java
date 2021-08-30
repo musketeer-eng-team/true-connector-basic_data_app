@@ -1,8 +1,11 @@
 package it.eng.idsa.dataapp.web.rest;
 
+import java.io.IOException;
 import java.util.Optional;
 
 import org.apache.http.entity.mime.MIME;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -12,8 +15,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestPart;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
 
 import it.eng.idsa.dataapp.service.MultiPartMessageService;
 import it.eng.idsa.dataapp.util.MessageUtil;
@@ -40,12 +41,9 @@ public class DataControllerBodyBinary {
 	public ResponseEntity<?> routerBinary(@RequestHeader HttpHeaders httpHeaders,
 			@RequestPart(value = "header") String headerMessage,
 			@RequestHeader(value = "Response-Type", required = false) String responseType,
-			@RequestPart(value = "payload", required = false) String payload) throws JsonProcessingException {
+			@RequestPart(value = "payload", required = false) String payload) throws IOException, ParseException {
 
 		logger.info("Multipart/mixed request");
-
-		// Convert de.fraunhofer.iais.eis.Message to the String
-//		String headerSerialized = new Serializer().serializePlainJson(headerMessage);
 		logger.info("header=" + headerMessage);
 		logger.info("headers=" + httpHeaders);
 		if (payload != null) {
@@ -57,7 +55,8 @@ public class DataControllerBodyBinary {
 		String headerResponse = multiPartMessageService.getResponseHeader(headerMessage);
 		String responsePayload = null;
 		if (!headerResponse.contains("ids:rejectionReason")) {
-			responsePayload = messageUtil.createResponsePayload(headerMessage);
+			JSONObject requestBody = messageUtil.createRequestBody(payload);
+			responsePayload = messageUtil.createResponsePayload(headerMessage, requestBody);
 		}else {
 			responsePayload = "Rejected message";
 		}

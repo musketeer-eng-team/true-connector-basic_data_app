@@ -2,8 +2,6 @@
 #FROM openjdk:11.0.6-stretch
 #FROM openjdk:12-jdk-alpine
 FROM openjdk:12-jdk-oraclelinux7
-# Add Maintainer Info
-LABEL maintainer="gabriele.deluca@eng.it"
 
 #Install whois service
 #RUN yum install -y whois
@@ -19,6 +17,9 @@ ARG JAR_FILE=target/market4.0-data-app-0.0.8-SNAPSHOT.jar
 
 # Add the application's jar to the container
 ADD ${JAR_FILE} market4.0-data-app.jar
+
+# Add response_files for Client Connector
+ADD response_files/* /dataLake/
 
 # Run the jar file 
 ENTRYPOINT ["java", "-Djava.security.egd=file:/dev/./urandom","-cp", "market4.0-data-app.jar:/config/", "org.springframework.boot.loader.JarLauncher"]

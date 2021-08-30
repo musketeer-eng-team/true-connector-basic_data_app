@@ -1,6 +1,8 @@
 package it.eng.idsa.dataapp.web.rest;
 
 import org.apache.commons.lang3.StringUtils;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -13,17 +15,42 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import it.eng.idsa.dataapp.domain.ProxyRequest;
+import it.eng.idsa.dataapp.service.PreProxyService;
 import it.eng.idsa.dataapp.service.ProxyService;
+
+import javax.servlet.http.HttpServletRequest;
 
 @RestController
 public class ProxyController {
 	
 	private static final Logger logger = LoggerFactory.getLogger(ProxyController.class);
 
+	private PreProxyService preProxyService;
 	private ProxyService proxyService;
 
-	public ProxyController(ProxyService proxyService) {
+	public ProxyController(PreProxyService preProxyService, ProxyService proxyService) {
+		this.preProxyService = preProxyService;
 		this.proxyService = proxyService;
+	}
+
+	/**
+	 * Unique entry point in data App for proxying multipart mixed, multipart form, http-header and wss requestss towards ECC
+	 * @param httpHeaders
+	 * @param body - json representation containing information needed for correct forwarding
+	 * @param method
+	 * @param request
+	 * @param response
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping("/pre-proxy/**")
+	public ResponseEntity<?> preProxyRequest(HttpServletRequest request, @RequestHeader HttpHeaders httpHeaders,
+											 @RequestBody String body, HttpMethod method) throws ParseException {
+
+		JSONObject parsedPreProxyRequest = preProxyService.parsePreProxyRequest(request.getRequestURI(), body, httpHeaders, method);
+		logger.info("Parsed pre-proxy request: " + parsedPreProxyRequest);
+
+		return preProxyService.retrievePayload(preProxyService.forwardToProxy(parsedPreProxyRequest, httpHeaders));
 	}
 
 	/**
